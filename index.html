@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도태 부캐 정복 카운터 & 시세 관리</title>
+    <link rel="stylesheet" href="style.css?v=28">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="app-header">
+        <div class="header-left">
+            <button id="menuToggleBtn" class="icon-btn">☰</button>
+        </div>
+        <h1 id="mainTitle" class="header-center">도태 정복 카운터</h1>
+        <div class="header-right">
+            <button id="settingsBtn" class="theme-btn">⚙️</button>
+            <button id="themeToggleBtn" class="theme-btn">☀️</button>
+        </div>
+    </div>
+
+    <div id="sideNav" class="side-nav">
+        <button class="nav-item active" data-target="viewCounter">⏱️ 도태 카운터</button>
+        <button class="nav-item" data-target="viewMarket">📈 시세/재고 관리</button>
+    </div>
+    <div id="navOverlay" class="nav-overlay"></div>
+
+    <div class="container view-section active" id="viewCounter">
+        <div class="settings">
+            <div class="setting-row">
+                <label for="totalRuns">목표 횟수:</label>
+                <input type="number" id="totalRuns" value="10" min="1">
+            </div>
+        </div>
+
+        <div class="status-board">
+            <h2>진행: <span id="currentRun">0</span> / <span id="targetRunDisplay">10</span></h2>
+            <div class="timer" id="timerDisplay">00:00.00</div>
+            <div class="eta-container">🏁 예상 종료: <span id="etaDisplay">--:--</span></div>
+        </div>
+
+        <div class="controls">
+            <div class="btn-group">
+                <button id="toggleTimerBtn" title="단축키: Space">시작 (Space)</button>
+                <button id="nextRunBtn" title="단축키: Enter" disabled>다음 (Enter)</button>
+                <button id="undoBtn" class="danger-outline" disabled>취소</button>
+            </div>
+            <input type="text" id="memoInput" placeholder="득템/특이사항 메모 (선택)" disabled>
+            <div class="btn-group" style="margin-top: 15px;">
+                <button id="saveSessionBtn" class="success">현재 세션 마감 및 보관</button>
+                <button id="resetBtn" class="danger">초기화</button>
+            </div>
+        </div>
+
+        <div id="statsCaptureArea" class="capture-section">
+            <div class="section-header">
+                <h3>현재 세션 통계</h3>
+                <div class="btn-row">
+                    <button id="copyShareBtn" class="theme-btn" data-html2canvas-ignore="true">📋 복사</button>
+                    <button id="captureChartBtn" class="theme-btn" data-html2canvas-ignore="true">📸 캡처</button>
+                </div>
+            </div>
+            <p>평균 시간: <span id="avgTimeDisplay">00:00.00</span></p>
+            
+            <div class="chart-container">
+                <div class="chart-scroll-wrapper">
+                    <div class="chart-box" id="chartBox">
+                        <span id="chartEmptyMsg">데이터가 쌓이면 그래프가 표시됩니다.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="logCaptureArea" class="capture-section">
+            <div class="section-header">
+                <h3>상세 기록 로그</h3>
+                <button id="captureLogBtn" class="theme-btn" data-html2canvas-ignore="true">📸 캡처</button>
+            </div>
+            <ul id="logList"></ul>
+        </div>
+
+        <div class="daily-summary-container capture-section">
+            <div class="section-header">
+                <h3>📅 일별 요약</h3>
+            </div>
+            <ul id="dailySummaryList" class="daily-list"></ul>
+        </div>
+
+        <div class="history-container">
+            <div class="section-header">
+                <h3>📁 이전 던전 기록</h3>
+                <button id="clearAllHistoryBtn" class="danger-outline">전체 비우기</button>
+            </div>
+            <ul id="historyList"></ul>
+        </div>
+    </div>
+
+    <div class="container view-section" id="viewMarket" style="display: none;">
+        
+        <div class="market-dashboard">
+            <div class="dash-box">
+                <h4>오늘 순수익</h4>
+                <div class="total-profit" id="dailyProfitDisplay">0 키나</div>
+            </div>
+            <div class="dash-box">
+                <h4>이번 주 순수익</h4>
+                <div class="total-profit" id="weeklyProfitDisplay">0 키나</div>
+            </div>
+        </div>
+
+        <div class="market-inner-nav">
+            <button class="inner-tab active" data-target="mTabTrade">🛒 거래/재고</button>
+            <button class="inner-tab" data-target="mTabHistory">📝 거래 내역</button>
+            <button class="inner-tab" data-target="mTabStats">📊 통계/차트</button>
+            <button class="inner-tab" data-target="mTabItems">⚙️ 품목 관리</button>
+        </div>
+
+        <div class="market-tab-content active" id="mTabTrade">
+            <div class="market-panel">
+                <h3>매입 / 판매 등록</h3>
+                <div class="trade-toggle">
+                    <button id="tradeTabBuy" class="trade-tab buy active">매입 (구매)</button>
+                    <button id="tradeTabSell" class="trade-tab sell">판매</button>
+                </div>
+                <div class="trade-form">
+                    <div class="form-row">
+                        <label>품목 선택</label>
+                        <select id="tradeItemSelect"><option value="">품목을 선택하세요</option></select>
+                        <div id="currentStockHint" class="stock-hint">💡 선택된 품목이 없습니다.</div>
+                    </div>
+                    <div class="form-row">
+                        <label>수량</label>
+                        <input type="text" id="tradeQty" value="1" placeholder="수량 입력">
+                    </div>
+                    <div class="form-row">
+                        <label>개당 단가 (키나)</label>
+                        <input type="text" id="tradePrice" value="0" placeholder="단가 입력">
+                    </div>
+                    
+                    <div id="sellOptions" style="display: none;">
+                        <div class="form-row">
+                            <label>수수료 (거래소)</label>
+                            <select id="tradeFee">
+                                <option value="0.1">일반 거래소 (10%)</option>
+                                <option value="0.2">월드 거래소 (20%)</option>
+                                <option value="0">수수료 없음</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>판매 목적</label>
+                            <select id="tradeSupplyType">
+                                <option value="일일 보급">일일 보급</option>
+                                <option value="주간 보급">주간 보급</option>
+                            </select>
+                        </div>
+                        <div class="preview-profit" id="previewProfitBox">
+                            예상 순수익: <span id="previewProfitText">-</span>
+                        </div>
+                    </div>
+                    <div class="btn-group" style="margin-top: 10px;">
+                        <button id="submitTradeBtn" class="success" title="단축키: Space">등록하기 (Space)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="market-panel">
+                <div class="section-header">
+                    <h3>📦 현재 창고 재고</h3>
+                </div>
+                <ul id="inventoryList" class="inventory-list"></ul>
+            </div>
+        </div>
+
+        <div class="market-tab-content" id="mTabHistory">
+            <div class="market-panel">
+                <div class="section-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>📝 거래 내역</h3>
+                        <div class="history-filters">
+                            <button class="filter-btn active" data-filter="all">전체</button>
+                            <button class="filter-btn" data-filter="buy">매입</button>
+                            <button class="filter-btn" data-filter="sell">판매</button>
+                        </div>
+                    </div>
+                    <div class="bulk-actions btn-group">
+                        <button id="bulkDeleteBuyBtn" class="danger-outline">매입 일괄 삭제</button>
+                        <button id="bulkDeleteSellBtn" class="danger-outline">판매 일괄 삭제</button>
+                        <button id="bulkDeleteAllBtn" class="danger">전체 초기화</button>
+                    </div>
+                </div>
+                <ul id="marketHistoryList" class="trade-history-list"></ul>
+            </div>
+        </div>
+
+        <div class="market-tab-content" id="mTabStats">
+            <div class="market-panel">
+                <div class="section-header">
+                    <h3>📈 품목별 시세 차트</h3>
+                </div>
+                <div id="marketStatsContainer" class="stats-container">
+                    <p class="empty-msg">데이터가 부족하여 차트를 구성할 수 없습니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="market-tab-content" id="mTabItems">
+            <div class="market-panel">
+                <h3>⚙️ 새 품목 등록</h3>
+                <div class="form-row" style="flex-direction: row; gap: 10px; align-items: center;">
+                    <input type="text" id="newItemName" placeholder="새 품목 이름 (Enter)" style="flex: 2;">
+                    <select id="newItemGrade" style="flex: 1;">
+                        <option value="white" class="text-grade-white">일반 (흰색)</option>
+                        <option value="green" class="text-grade-green">고급 (초록)</option>
+                        <option value="blue" class="text-grade-blue">희귀 (파랑)</option>
+                    </select>
+                    <button id="addMarketItemBtn" class="primary" style="flex: none; width: auto; padding: 10px 15px;">추가</button>
+                </div>
+            </div>
+            
+            <div class="market-panel">
+                <h3>📋 등록된 품목 목록</h3>
+                <div id="marketItemManageGrouped" class="grouped-item-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ 카운터 설정 및 백업</h2>
+                <button id="closeModalBtn" class="close-btn">✖</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-row-col">
+                    <label for="shareTemplate">디스코드 공유 텍스트 포맷</label>
+                    <textarea id="shareTemplate" rows="3" placeholder="{현재}, {목표}, {평균}, {최고} 변수 사용가능"></textarea>
+                    <small>예: 🔥오늘 도태 {현재}/{목표} 완! (평균 {평균})</small>
+                </div>
+                
+                <div class="data-management" style="margin-top: 25px;">
+                    <button id="exportBtn">데이터 백업 (내보내기)</button>
+                    <label for="importInput" class="import-label">데이터 복구 (불러오기)</label>
+                    <input type="file" id="importInput" accept=".json">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
