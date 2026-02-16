@@ -140,10 +140,10 @@ li.log-item { background: var(--item-bg); margin: 8px 0; padding: 12px; border-r
 .setting-row-col small { color: var(--text-muted); font-size: 0.8rem; margin-top: 5px; }
 
 /* ---------------- 마켓 UI 전용 ---------------- */
-.market-dashboard { display: flex; gap: 15px; margin-bottom: 20px; }
-.dash-box { flex: 1; background: var(--item-bg); border-radius: 8px; padding: 15px; text-align: center; border: 1px solid var(--item-hover); }
-.dash-box h4 { margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.95rem; }
-.total-profit { font-size: 1.4rem; font-weight: bold; color: var(--warning); word-break: break-all;}
+.market-dashboard { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.dash-box { flex: 1; min-width: 30%; background: var(--item-bg); border-radius: 8px; padding: 12px 5px; text-align: center; border: 1px solid var(--item-hover); }
+.dash-box h4 { margin: 0 0 8px 0; color: var(--text-muted); font-size: 0.85rem; word-break: keep-all;}
+.total-profit { font-size: 1.15rem; font-weight: bold; color: var(--warning); word-break: break-all;}
 .total-profit.positive { color: var(--success); }
 .total-profit.negative { color: var(--danger); }
 
@@ -181,11 +181,14 @@ li.log-item { background: var(--item-bg); margin: 8px 0; padding: 12px; border-r
 .bg-blue { background-color: var(--grade-blue); }
 
 .inventory-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-.inv-item { background: var(--item-bg); padding: 12px 15px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px;}
+.inv-item { background: var(--item-bg); padding: 12px 15px; border-radius: 6px; display: flex; flex-direction: column; gap: 10px;}
 .inv-header { display: flex; justify-content: space-between; align-items: center; }
 .inv-name { font-size: 1.1rem; }
 .inv-actions { display: flex; align-items: center; gap: 8px; }
 .inv-actions button { position: static !important; background: transparent !important; padding: 0 !important; border: none !important; cursor: pointer; flex: none; width: auto; font-size: 1rem;}
+.inv-process { font-size: 0.85rem; font-weight: bold; display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 5px 8px; border-radius: 4px;}
+.primary-text { color: var(--primary); }
+.danger-text { color: var(--danger); }
 .inv-stats { text-align: right; font-size: 0.9rem; display: flex; justify-content: space-between; color: var(--text-muted); padding-top: 5px; border-top: 1px dashed var(--chart-bg);}
 .inv-stats span { display: block; }
 .inv-stats b { color: var(--text-main); font-size: 1rem;}
@@ -193,7 +196,10 @@ li.log-item { background: var(--item-bg); margin: 8px 0; padding: 12px; border-r
 .history-filters { display: flex; gap: 5px; background: var(--item-bg); padding: 4px; border-radius: 6px; }
 .filter-btn { background: transparent; color: var(--text-muted); border: none; padding: 4px 10px; font-size: 0.8rem; border-radius: 4px; flex: none; width: auto; }
 .filter-btn.active { background: var(--primary); color: var(--text-inverse); }
+.filter-select { background: var(--item-bg); color: var(--text-main); border: 1px solid var(--item-hover); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; }
 .history-date-divider { background: var(--item-bg); color: var(--text-main); font-weight: bold; padding: 8px 12px; border-radius: 6px; margin: 15px 0 10px 0; font-size: 0.95rem; text-align: center; border: 1px solid var(--item-hover);}
+.daily-history-summary { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px; text-align: right; font-weight: bold; font-size: 0.9rem; margin-top: 10px; border: 1px dashed var(--item-hover);}
+.success-text { color: var(--success); font-size: 1.1rem;}
 
 .trade-history-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;}
 .trade-item { background: var(--item-bg); padding: 12px; border-radius: 6px; border-left: 4px solid transparent; display: flex; flex-direction: column; position: relative;}
@@ -201,7 +207,7 @@ li.log-item { background: var(--item-bg); margin: 8px 0; padding: 12px; border-r
 .trade-item.sell { border-left-color: var(--danger); }
 .trade-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 5px; padding-right: 25px; }
 .trade-header span { display: flex; align-items: center; }
-.t-type { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; color: var(--text-inverse); margin-left: 6px;}
+.t-type { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; color: var(--text-inverse); margin-right: 6px;}
 .t-type.buy { background: var(--primary); }
 .t-type.sell { background: var(--danger); }
 .trade-details { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
@@ -220,6 +226,7 @@ li.log-item { background: var(--item-bg); margin: 8px 0; padding: 12px; border-r
 
 .stats-container { display: flex; flex-direction: column; gap: 20px; }
 .stat-item-block { background: var(--item-bg); padding: 15px; border-radius: 8px; }
-.stat-item-name { font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center;}
-.trend-container { background: var(--chart-bg); padding: 10px; border-radius: 6px; margin-bottom: 10px;}
-.trend-header { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; display: flex; justify-content: space-between; font-weight: bold;}
+.stat-item-name { font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between;}
+.stat-item-name span { display: flex; align-items: center; }
+.stat-item-avg { font-size: 0.85rem; color: var(--text-muted); font-weight: normal; }
+.chart-canvas-wrapper { position: relative; height: 150px; width: 100%; }

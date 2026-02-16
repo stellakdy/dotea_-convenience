@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도태 부캐 정복 카운터 & 시세 관리</title>
-    <link rel="stylesheet" href="style.css?v=28">
+    <link rel="stylesheet" href="style.css?v=30">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-header">
@@ -56,8 +57,8 @@
             <div class="section-header">
                 <h3>현재 세션 통계</h3>
                 <div class="btn-row">
-                    <button id="copyShareBtn" class="theme-btn" data-html2canvas-ignore="true">📋 복사</button>
-                    <button id="captureChartBtn" class="theme-btn" data-html2canvas-ignore="true">📸 캡처</button>
+                    <button id="copyShareBtn" class="theme-btn" data-html2canvas-ignore="true">📋 텍스트 복사</button>
+                    <button id="captureChartBtn" class="theme-btn" data-html2canvas-ignore="true">📸 그래프 캡처</button>
                 </div>
             </div>
             <p>평균 시간: <span id="avgTimeDisplay">00:00.00</span></p>
@@ -74,7 +75,7 @@
         <div id="logCaptureArea" class="capture-section">
             <div class="section-header">
                 <h3>상세 기록 로그</h3>
-                <button id="captureLogBtn" class="theme-btn" data-html2canvas-ignore="true">📸 캡처</button>
+                <button id="captureLogBtn" class="theme-btn" data-html2canvas-ignore="true">📸 로그 캡처</button>
             </div>
             <ul id="logList"></ul>
         </div>
@@ -99,19 +100,23 @@
         
         <div class="market-dashboard">
             <div class="dash-box">
-                <h4>오늘 순수익</h4>
+                <h4>오늘 수익</h4>
                 <div class="total-profit" id="dailyProfitDisplay">0 키나</div>
             </div>
             <div class="dash-box">
-                <h4>이번 주 순수익</h4>
+                <h4>이번주 수익</h4>
                 <div class="total-profit" id="weeklyProfitDisplay">0 키나</div>
+            </div>
+            <div class="dash-box">
+                <h4>현재 재고 매입액</h4>
+                <div class="total-profit" id="inventoryValueDisplay" style="color: var(--primary);">0 키나</div>
             </div>
         </div>
 
         <div class="market-inner-nav">
             <button class="inner-tab active" data-target="mTabTrade">🛒 거래/재고</button>
             <button class="inner-tab" data-target="mTabHistory">📝 거래 내역</button>
-            <button class="inner-tab" data-target="mTabStats">📊 통계/차트</button>
+            <button class="inner-tab" data-target="mTabStats">📈 시세 차트</button>
             <button class="inner-tab" data-target="mTabItems">⚙️ 품목 관리</button>
         </div>
 
@@ -174,14 +179,20 @@
         <div class="market-tab-content" id="mTabHistory">
             <div class="market-panel">
                 <div class="section-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3>📝 거래 내역</h3>
-                        <div class="history-filters">
-                            <button class="filter-btn active" data-filter="all">전체</button>
-                            <button class="filter-btn" data-filter="buy">매입</button>
-                            <button class="filter-btn" data-filter="sell">판매</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="margin:0;">📝 거래 내역</h3>
+                        <div class="history-filters" style="display: flex; gap: 8px;">
+                            <select id="historyDateFilter" class="filter-select">
+                                <option value="all">📅 모든 날짜</option>
+                            </select>
+                            <div style="display: flex; gap: 4px; background: var(--item-bg); padding: 4px; border-radius: 6px;">
+                                <button class="filter-btn active" data-filter="all">전체</button>
+                                <button class="filter-btn" data-filter="buy">매입</button>
+                                <button class="filter-btn" data-filter="sell">판매</button>
+                            </div>
                         </div>
                     </div>
+                    <div id="dailyHistorySummary" class="daily-history-summary" style="display: none;"></div>
                     <div class="bulk-actions btn-group">
                         <button id="bulkDeleteBuyBtn" class="danger-outline">매입 일괄 삭제</button>
                         <button id="bulkDeleteSellBtn" class="danger-outline">판매 일괄 삭제</button>
@@ -195,7 +206,7 @@
         <div class="market-tab-content" id="mTabStats">
             <div class="market-panel">
                 <div class="section-header">
-                    <h3>📈 품목별 시세 차트</h3>
+                    <h3>📈 품목별 시세 추이 (주식 차트)</h3>
                 </div>
                 <div id="marketStatsContainer" class="stats-container">
                     <p class="empty-msg">데이터가 부족하여 차트를 구성할 수 없습니다.</p>
@@ -222,6 +233,7 @@
                 <div id="marketItemManageGrouped" class="grouped-item-list"></div>
             </div>
         </div>
+
     </div>
 
     <div id="settingsModal" class="modal-overlay">

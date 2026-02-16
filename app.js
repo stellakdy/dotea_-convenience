@@ -443,6 +443,7 @@ class UIManager {
             
             dailyProfitDisplay: document.getElementById('dailyProfitDisplay'),
             weeklyProfitDisplay: document.getElementById('weeklyProfitDisplay'),
+            inventoryValueDisplay: document.getElementById('inventoryValueDisplay'),
             marketStatsContainer: document.getElementById('marketStatsContainer')
         };
         
@@ -468,7 +469,6 @@ class UIManager {
         else inputEl.value = '';
     }
     bindEvents() {
-        // 테마 변경 버튼 이벤트 리스너 추가
         this.els.themeBtn.addEventListener('click', () => this.toggleTheme());
 
         this.els.menuToggleBtn.addEventListener('click', () => { this.els.sideNav.classList.add('open'); this.els.navOverlay.classList.add('open'); });
@@ -657,7 +657,7 @@ class UIManager {
         
         this.store.on('MARKET_ITEMS_UPDATED', () => { this.renderMarketItemsManage(); this.renderTradeSelect(); this.updatePreviewProfit(); this.renderMarketStats(); });
         this.store.on('MARKET_TRADE_ADDED', () => { this.renderInventory(); this.renderTradeHistory(); this.renderTradeSelect(); this.updatePreviewProfit(); this.renderMarketDashboard(); this.renderMarketStats(); });
-        this.store.on('MARKET_INVENTORY_UPDATED', () => { this.renderInventory(); this.renderTradeSelect(); this.updatePreviewProfit(); });
+        this.store.on('MARKET_INVENTORY_UPDATED', () => { this.renderInventory(); this.renderTradeSelect(); this.updatePreviewProfit(); this.renderMarketDashboard(); });
         this.store.on('DATA_IMPORTED', () => location.reload());
     }
 
@@ -690,6 +690,15 @@ class UIManager {
         this.els.dailyProfitDisplay.className = 'total-profit ' + (dailyProfit > 0 ? 'positive' : (dailyProfit < 0 ? 'negative' : ''));
         this.els.weeklyProfitDisplay.textContent = Utils.formatMoney(weeklyProfit);
         this.els.weeklyProfitDisplay.className = 'total-profit ' + (weeklyProfit > 0 ? 'positive' : (weeklyProfit < 0 ? 'negative' : ''));
+
+        const inv = this.store.getState().inventory;
+        let totalInvValue = 0;
+        Object.values(inv).forEach(item => {
+            if (item && item.totalCost > 0) {
+                totalInvValue += item.totalCost;
+            }
+        });
+        this.els.inventoryValueDisplay.textContent = Utils.formatMoney(totalInvValue);
     }
 
     renderMarketStats() {
