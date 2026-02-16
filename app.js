@@ -468,6 +468,9 @@ class UIManager {
         else inputEl.value = '';
     }
     bindEvents() {
+        // 테마 변경 버튼 이벤트 리스너 추가
+        this.els.themeBtn.addEventListener('click', () => this.toggleTheme());
+
         this.els.menuToggleBtn.addEventListener('click', () => { this.els.sideNav.classList.add('open'); this.els.navOverlay.classList.add('open'); });
         this.els.navOverlay.addEventListener('click', () => { this.els.sideNav.classList.remove('open'); this.els.navOverlay.classList.remove('open'); });
         this.els.navItems.forEach(btn => {
