@@ -694,8 +694,11 @@ class UIManager {
         const inv = this.store.getState().inventory;
         let totalInvValue = 0;
         Object.values(inv).forEach(item => {
-            if (item && item.totalCost > 0) {
-                totalInvValue += item.totalCost;
+            if (item && item.qty > 0 && item.totalCost) {
+                const cost = Number(item.totalCost);
+                if (!isNaN(cost)) {
+                    totalInvValue += cost;
+                }
             }
         });
         this.els.inventoryValueDisplay.textContent = Utils.formatMoney(totalInvValue);
@@ -830,6 +833,7 @@ class UIManager {
         }
     }
 
+    // ★ 텍스트가 화면 우측 하단으로 날아가는 현상을 방지하기 위해 완전히 수정된 함수입니다.
     updatePreviewProfit() {
         if (this.currentTradeType !== 'sell') return;
         const itemId = this.els.tradeItemSelect.value;
@@ -837,9 +841,16 @@ class UIManager {
         const price = Utils.parseNumber(this.els.tradePrice.value);
         const fee = parseFloat(this.els.tradeFee.value) || 0;
 
+        // CSS 충돌 (position: absolute) 완전 차단을 위한 강제 초기화
+        this.els.previewProfitText.className = '';
+        this.els.previewProfitText.style.position = 'static';
+
         if (!itemId || qty <= 0 || price <= 0) {
-            this.els.previewProfitText.textContent = '-'; this.els.previewProfitText.className = ''; return;
+            this.els.previewProfitText.textContent = '-'; 
+            this.els.previewProfitText.style.color = 'inherit';
+            return;
         }
+        
         const inv = this.store.getState().inventory[itemId];
         const avgCost = inv && inv.qty > 0 ? (inv.totalCost / inv.qty) : 0;
         
@@ -847,10 +858,16 @@ class UIManager {
         const cost = Math.floor(qty * avgCost);
         const profit = revenue - cost;
 
-        this.els.previewProfitText.textContent = Utils.formatMoney(profit);
-        if (profit > 0) this.els.previewProfitText.className = 'trade-profit up';
-        else if (profit < 0) this.els.previewProfitText.className = 'trade-profit down';
-        else this.els.previewProfitText.className = '';
+        const prefix = profit > 0 ? '+' : '';
+        this.els.previewProfitText.textContent = prefix + Utils.formatMoney(profit);
+        
+        if (profit > 0) {
+            this.els.previewProfitText.style.color = 'var(--success)';
+        } else if (profit < 0) {
+            this.els.previewProfitText.style.color = 'var(--danger)';
+        } else {
+            this.els.previewProfitText.style.color = 'var(--text-main)';
+        }
     }
 
     renderInventory() {
